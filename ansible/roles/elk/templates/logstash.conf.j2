@@ -1,0 +1,28 @@
+input {
+  beats {
+    port => 5044
+  }
+}
+
+filter {
+  if [kubernetes] {
+    mutate {
+      add_field => {
+        "[@metadata][index_suffix]" => "%{[kubernetes][namespace]}-%{[kubernetes][labels][app]}"
+      }
+    }
+  } else {
+    mutate {
+      add_field => {
+        "[@metadata][index_suffix]" => "unknown"
+      }
+    }
+  }
+}
+
+output {
+  elasticsearch {
+    hosts => ["localhost:9200"]
+    index => "mental-health-logs-%{[@metadata][index_suffix]}-%{+YYYY.MM.dd}"
+  }
+}

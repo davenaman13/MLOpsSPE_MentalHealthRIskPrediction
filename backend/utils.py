@@ -41,13 +41,7 @@ def preprocess_input(df, encoders):
             try:
                 df[col] = encoder.transform(df[col])
             except ValueError:
+                # Handle unseen labels by mapping unknowns to a default value (e.g., the most frequent class or 0)
                 known_classes = list(encoder.classes_)
-                df[col] = df[col].apply(
-                    lambda x: encoder.transform([x])[0] if x in known_classes else encoder.transform([known_classes[0]])[0]
-                )
-    # ✅ Convert to numeric types
-    df = df.apply(pd.to_numeric, errors='coerce')
-    df.fillna(0, inplace=True)  # Optional: Fill any NaNs after conversion
+                df[col] = df[col].apply(lambda x: encoder.transform([x])[0] if x in known_classes else encoder.transform([known_classes[0]])[0])
     return df
-
-

@@ -1,0 +1,47 @@
+---
+- name: Add Kubernetes apt key
+  apt_key:
+    url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+    state: present
+
+- name: Add Kubernetes repository
+  apt_repository:
+    repo: deb https://apt.kubernetes.io/ kubernetes-xenial main
+    state: present
+    filename: kubernetes
+
+- name: Install Kubernetes packages
+  apt:
+    name:
+      - kubelet
+      - kubeadm
+      - kubectl
+    state: present
+    update_cache: yes
+
+- name: Disable swap
+  command: swapoff -a
+  changed_when: false
+
+- name: Disable swap in fstab
+  replace:
+    path: /etc/fstab
+    regexp: '^/swap.img'
+    replace: '#/swap.img'
+
+- name: Initialize Kubernetes cluster (master only)
+  command: kubeadm init --pod-network-cidr=10.244.0.0/16
+  when: inventory_hostname == 'master-node'
+
+- name: Set up kubeconfig for deploy user
+  copy:
+    content: "{{ lookup('file', '/etc/kubernetes/admin.conf') }}"
+    dest: /home/deploy/.kube/config
+    owner: deploy
+    group: deploy
+    mode: '0600'
+  when: inventory_hostname == 'master-node'
+
+- name: Install Flannel network plugin
+  command: kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+  when: inventory_hostname == 'master-node'

@@ -1,6 +1,0 @@
-- name: Deploy App to Kubernetes Cluster
-  hosts: k8s_nodes
-  become: yes
-  tasks:
-    - name: Apply Kubernetes manifests
-      shell: kubectl apply -f /home/ubuntu/mental-health-predictor/kubernetes/

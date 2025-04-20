@@ -1,0 +1,28 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Build Docker Images') {
+            steps {
+                sh 'docker build -t mental-health-backend ./backend'
+                sh 'docker build -t mental-health-frontend ./frontend'
+            }
+        }
+        stage('Push to DockerHub') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
+                    sh "echo $PASS | docker login -u $USER --password-stdin"
+                    sh 'docker tag mental-health-backend user/mental-health-backend'
+                    sh 'docker push user/mental-health-backend'
+                    sh 'docker tag mental-health-frontend user/mental-health-frontend'
+                    sh 'docker push user/mental-health-frontend'
+                }
+            }
+        }
+        stage('Deploy via Ansible') {
+            steps {
+                sh 'ansible-playbook -i ansible/inventory.ini ansible/playbook.yaml'
+            }
+        }
+    }
+}

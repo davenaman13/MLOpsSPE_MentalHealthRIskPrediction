@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Mental Health Risk Prediction</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Mental Health Risk Prediction Form</h1>
+        <form method="POST">
+            <label>Age:</label>
+            <input type="number" name="age" required>
+
+            <label>Gender:</label>
+            <input type="text" name="gender" required>
+
+            <label>Country:</label>
+            <input type="text" name="country" required>
+
+            <label>State:</label>
+            <input type="text" name="state">
+
+            <label>Are you self-employed?</label>
+            <select name="self_employed">
+                <option value="Yes">Yes</option>
+                <option value="No">No</option>
+                <option value="Prefer not to say">Prefer not to say</option>
+            </select>
+
+            <label>Family history of mental illness?</label>
+            <select name="family_history">
+                <option value="Yes">Yes</option>
+                <option value="No">No</option>
+            </select>
+
+            <label>Does your mental health interfere with work?</label>
+            <select name="work_interfere">
+                <option value="Never">Never</option>
+                <option value="Rarely">Rarely</option>
+                <option value="Sometimes">Sometimes</option>
+                <option value="Often">Often</option>
+                <option value="NA">NA</option>
+            </select>
+
+            <label>Number of employees in your company:</label>
+            <input type="text" name="no_employees" required>
+
+            <label>Do you work remotely?</label>
+            <select name="remote_work">
+                <option value="Yes">Yes</option>
+                <option value="No">No</option>
+            </select>
+
+            <label>Is it a tech company?</label>
+            <select name="tech_company">
+                <option value="Yes">Yes</option>
+                <option value="No">No</option>
+            </select>
+
+            <label>Do you have mental health benefits?</label>
+            <select name="benefits">
+                <option value="Yes">Yes</option>
+                <option value="No">No</option>
+                <option value="Don't know">Don't know</option>
+            </select>
+
+            <label>Do you know care options?</label>
+            <select name="care_options">
+                <option value="Yes">Yes</option>
+                <option value="No">No</option>
+                <option value="Not sure">Not sure</option>
+            </select>
+
+            <label>Wellness program?</label>
+            <select name="wellness_program">
+                <option value="Yes">Yes</option>
+                <option value="No">No</option>
+                <option value="Don't know">Don't know</option>
+            </select>
+
+            <label>Can you seek help?</label>
+            <select name="seek_help">
+                <option value="Yes">Yes</option>
+                <option value="No">No</option>
+                <option value="Don't know">Don't know</option>
+            </select>
+
+            <label>Anonymity when seeking help?</label>
+            <select name="anonymity">
+                <option value="Yes">Yes</option>
+                <option value="No">No</option>
+                <option value="Don't know">Don't know</option>
+            </select>
+
+            <label>Ease of taking leave for mental health?</label>
+            <select name="leave">
+                <option value="Very easy">Very easy</option>
+                <option value="Somewhat easy">Somewhat easy</option>
+                <option value="Somewhat difficult">Somewhat difficult</option>
+                <option value="Very difficult">Very difficult</option>
+                <option value="Don't know">Don't know</option>
+            </select>
+
+            <label>Mental health consequence if discussed?</label>
+            <select name="mental_health_consequence">
+                <option value="Yes">Yes</option>
+                <option value="No">No</option>
+                <option value="Maybe">Maybe</option>
+            </select>
+
+            <label>Physical health consequence if discussed?</label>
+            <select name="phys_health_consequence">
+                <option value="Yes">Yes</option>
+                <option value="No">No</option>
+                <option value="Maybe">Maybe</option>
+            </select>
+
+            <label>Can you talk to coworkers about mental health?</label>
+            <select name="coworkers">
+                <option value="Yes">Yes</option>
+                <option value="No">No</option>
+                <option value="Some of them">Some of them</option>
+            </select>
+
+            <label>Can you talk to your supervisor?</label>
+            <select name="supervisor">
+                <option value="Yes">Yes</option>
+                <option value="No">No</option>
+                <option value="Some of them">Some of them</option>
+            </select>
+
+            <label>Willing to discuss in interview?</label>
+            <select name="mental_health_interview">
+                <option value="Yes">Yes</option>
+                <option value="No">No</option>
+                <option value="Maybe">Maybe</option>
+            </select>
+
+            <label>Physical health interview discussion?</label>
+            <select name="phys_health_interview">
+                <option value="Yes">Yes</option>
+                <option value="No">No</option>
+                <option value="Maybe">Maybe</option>
+            </select>
+
+            <label>Importance of mental vs physical health:</label>
+            <select name="mental_vs_physical">
+                <option value="Yes">Yes</option>
+                <option value="No">No</option>
+                <option value="Don't know">Don't know</option>
+            </select>
+
+            <label>Negative consequences observed?</label>
+            <select name="obs_consequence">
+                <option value="Yes">Yes</option>
+                <option value="No">No</option>
+            </select>
+
+            <button type="submit">Predict</button>
+        </form>
+
+        {% if prediction %}
+        <div class="result">
+            <h3>Prediction Result:</h3>
+            <p>{{ prediction }}</p>
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>

@@ -3,7 +3,7 @@ import requests
 
 app = Flask(__name__)
 
-BACKEND_URL = "http://localhost:5001/predict"  # Backend server URL
+BACKEND_URL = "http://mental-health-backend:5001/predict"  # Backend server URL
 
 @app.route("/", methods=["GET", "POST"])
 def index():
@@ -19,4 +19,4 @@ def index():
     return render_template("index.html", prediction=prediction)
 
 if __name__ == "__main__":
-    app.run(port=5003, debug=True)
+    app.run(host="0.0.0.0",port=5003, debug=True)

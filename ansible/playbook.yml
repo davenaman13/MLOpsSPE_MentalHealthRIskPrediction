@@ -4,4 +4,4 @@
 
   tasks:
     - name: Apply Kubernetes Configurations
-      shell: kubectl apply -f /path/to/k8s/
+      shell: kubectl apply -f /home/naman/Desktop/MLOpsSPE/kubernetes

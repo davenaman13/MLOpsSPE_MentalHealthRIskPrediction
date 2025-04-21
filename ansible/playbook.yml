@@ -1,0 +1,7 @@
+- name: Deploy Mental Health Prediction App
+  hosts: k8s-master
+  become: yes
+
+  tasks:
+    - name: Apply Kubernetes Configurations
+      shell: kubectl apply -f /path/to/k8s/

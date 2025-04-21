@@ -1,17 +1,20 @@
-# backend/app.py
-
 from flask import Flask, request, jsonify
 import pickle
 import pandas as pd
+import os
+
 from utils import load_encoders, preprocess_input
 
 app = Flask(__name__)
 
-# Load model and encoders
-with open('model_weights.pkl', 'rb') as f:
+# Set base directory to the current file's location
+base_dir = os.path.dirname(__file__)
+
+# Load model and encoders with absolute paths
+with open(os.path.join(base_dir, 'model_weights.pkl'), 'rb') as f:
     model = pickle.load(f)
 
-encoders = load_encoders()
+encoders = load_encoders(path=os.path.join(base_dir, 'encoders.pkl'))
 
 @app.route('/predict', methods=['POST'])
 def predict():
@@ -34,4 +37,4 @@ def predict():
 
 
 if __name__ == '__main__':
-    app.run(port=5001)
+    app.run(host="0.0.0.0", port=5001)

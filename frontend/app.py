@@ -3,7 +3,7 @@ import requests
 
 app = Flask(__name__)
 
-BACKEND_URL = "http://backend-service:5001/predict"  # Backend server URL
+BACKEND_URL = "http://localhost:5001/predict"  # Backend server URL
 
 @app.route("/", methods=["GET", "POST"])
 def index():

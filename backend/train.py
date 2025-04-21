@@ -34,12 +34,14 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_
 clf = RandomForestClassifier()
 clf.fit(X_train, y_train)
 
+base_dir = os.path.dirname(__file__)
+
 # Save model
-with open('model_weights.pkl', 'wb') as f:
+with open(os.path.join(base_dir, 'model_weights.pkl'), 'wb') as f:
     pickle.dump(clf, f)
 
 # Save encoders
-with open('encoders.pkl', 'wb') as f:
+with open(os.path.join(base_dir, 'encoders.pkl'), 'wb') as f:
     pickle.dump(label_encoders, f)
 
 print("✅ Training complete. Model and encoders saved.")

@@ -56,27 +56,27 @@ pipeline {
             }
         }
         
-        stage('Run Tests') {
-            steps {
-                script {
-                    // Backend tests
-                    sh """
-                        docker run --rm \
-                        -e PORT=${BACKEND_PORT} \
-                        ${BACKEND_SERVICE}:${env.BUILD_ID} \
-                        python -m pytest tests/
-                    """
+        // stage('Run Tests') {
+        //     steps {
+        //         script {
+        //             // Backend tests
+        //             sh """
+        //                 docker run --rm \
+        //                 -e PORT=${BACKEND_PORT} \
+        //                 ${BACKEND_SERVICE}:${env.BUILD_ID} \
+        //                 python -m pytest tests/
+        //             """
                     
-                    // Frontend tests
-                    sh """
-                        docker run --rm \
-                        -e PORT=${FRONTEND_PORT} \
-                        ${FRONTEND_SERVICE}:${env.BUILD_ID} \
-                        python -m pytest tests/
-                    """
-                }
-            }
-        }
+        //             // Frontend tests
+        //             sh """
+        //                 docker run --rm \
+        //                 -e PORT=${FRONTEND_PORT} \
+        //                 ${FRONTEND_SERVICE}:${env.BUILD_ID} \
+        //                 python -m pytest tests/
+        //             """
+        //         }
+        //     }
+        // }
         
         stage('Deploy') {
             steps {

@@ -2,9 +2,14 @@ FROM python:3.9
 
 WORKDIR /app
 
+# First copy ONLY requirements.txt
 COPY requirements.txt .
-RUN pip install -r requirements.txt
 
+# Install dependencies
+RUN pip install --upgrade pip && \
+    pip install -r requirements.txt pytest pytest-cov
+
+# Then copy the rest
 COPY . .
 
 EXPOSE 5003

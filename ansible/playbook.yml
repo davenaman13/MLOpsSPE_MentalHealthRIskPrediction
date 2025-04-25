@@ -1,19 +1,16 @@
-- name: Set up MLOps Project
-  hosts: remote
-  become: yes  # This ensures sudo is used for all tasks
-  become_user: root
-  tasks:
-    - name: Update apt cache
-      apt:
-        update_cache: yes
-    - name: Install Docker
-      include_role:
-        name: docker
+---
+- name: Run all roles for MLOps project on localhost
+  hosts: localhost
+  become: true
+  vars:
+    app_source: "/home/naman/Desktop/MLOpsSPE"  # base path to your full project
+    app_target: "/home/naman/Desktop/app"               # where it will be copied and run
+    backend_file: "backend/app.py"
+    frontend_file: "frontend/app.py"
+    backend_port: 5001
+    frontend_port: 5003
 
-    - name: Install Jenkins
-      include_role:
-        name: jenkins
-
-    - name: Deploy Application
-      include_role:
-        name: app_deploy
+  roles:
+    - docker
+    - jenkins
+    - app_deploy

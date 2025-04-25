@@ -1,21 +1,174 @@
 pipeline {
     agent any
+    
+    environment {
+        DOCKER_HUB_CREDENTIALS = credentials('docker-hub-credentials')
+        COMPOSE_FILE = 'docker-compose.yml'
+        BACKEND_SERVICE = 'mental-health-backend'
+        FRONTEND_SERVICE = 'mental-health-frontend'
+        BACKEND_PORT = '5001'
+        FRONTEND_PORT = '5003'
+    }
+    
     stages {
-        stage('Clone') {
+        stage('Checkout') {
             steps {
-                git 'https://github.com/davenaman13/MLOpsSPE_MentalHealthRIskPrediction.git'
+                git branch: 'main', url: 'https://github.com/davenaman13/MLOpsSPE_MentalHealthRIskPrediction.git'
             }
         }
+        
         stage('Build Images') {
             steps {
-                sh 'docker-compose build'
+                script {
+                    // Build backend with the exact service name from compose file
+                    docker.build("${BACKEND_SERVICE}:${env.BUILD_ID}", "-f backend/Dockerfile backend/")
+                    
+                    // Build frontend with the exact service name from compose file
+                    docker.build("${FRONTEND_SERVICE}:${env.BUILD_ID}", "-f frontend/Dockerfile frontend/")
+                }
             }
         }
-        stage('Test') {
+        
+        stage('Unit Tests') {
             steps {
-                sh 'docker-compose up -d'
-                sh 'curl -X POST http://localhost:5003'
+                script {
+                    // Backend unit tests
+                    sh """
+                        docker run --rm \
+                        -e PORT=${BACKEND_PORT} \
+                        ${BACKEND_SERVICE}:${env.BUILD_ID} \
+                        python -m pytest tests/unit/ || exit 1
+                    """
+                    
+                    // Frontend unit tests (adjust if using different test command)
+                    sh """
+                        docker run --rm \
+                        -e PORT=${FRONTEND_PORT} \
+                        ${FRONTEND_SERVICE}:${env.BUILD_ID} \
+                        npm test || exit 1
+                    """
+                }
             }
+        }
+        
+        stage('Integration Tests') {
+            steps {
+                script {
+                    // Start services in test mode
+                    sh 'docker-compose up -d'
+                    
+                    // Wait for backend to be ready
+                    sh """
+                        while ! curl -f http://localhost:${BACKEND_PORT}/health; do
+                            sleep 5
+                            echo "Waiting for backend to start..."
+                        done
+                    """
+                    
+                    // Run integration tests (example - adjust to your needs)
+                    sh """
+                        docker run --rm --network host \
+                        -e BACKEND_URL=http://localhost:${BACKEND_PORT} \
+                        -e FRONTEND_URL=http://localhost:${FRONTEND_PORT} \
+                        your-test-image:latest \
+                        pytest tests/integration/
+                    """
+                    
+                    // Cleanup
+                    sh 'docker-compose down'
+                }
+            }
+        }
+        
+        stage('Push Images') {
+            when {
+                branch 'main'
+            }
+            steps {
+                script {
+                    docker.withRegistry('https://registry.hub.docker.com', 'docker-hub-credentials') {
+                        docker.image("${BACKEND_SERVICE}:${env.BUILD_ID}").push("latest")
+                        docker.image("${FRONTEND_SERVICE}:${env.BUILD_ID}").push("latest")
+                    }
+                }
+            }
+        }
+        
+        stage('Deploy to Staging') {
+            when {
+                branch 'main'
+            }
+            steps {
+                script {
+                    // Stop and remove existing containers
+                    sh 'docker-compose down || true'
+                    
+                    // Pull latest images (if using registry) or use local builds
+                    sh 'docker-compose pull || true'
+                    
+                    // Start services with build (if using local images)
+                    sh 'docker-compose up -d --build'
+                    
+                    // Verify backend health
+                    sh """
+                        curl --retry 10 --retry-delay 5 --retry-connrefused \
+                        http://localhost:${BACKEND_PORT}/health || exit 1
+                    """
+                    
+                    // Verify frontend availability
+                    sh """
+                        curl --retry 10 --retry-delay 5 --retry-connrefused \
+                        http://localhost:${FRONTEND_PORT} || exit 1
+                    """
+                }
+            }
+        }
+        
+        stage('Smoke Tests') {
+            when {
+                branch 'main'
+            }
+            steps {
+                script {
+                    // Backend API test
+                    sh """
+                        curl -f http://localhost:${BACKEND_PORT}/api/healthcheck && \
+                        echo "Backend smoke test passed" || \
+                        (echo "Backend smoke test failed" && exit 1)
+                    """
+                    
+                    // Frontend test
+                    sh """
+                        curl -f http://localhost:${FRONTEND_PORT} && \
+                        echo "Frontend smoke test passed" || \
+                        (echo "Frontend smoke test failed" && exit 1)
+                    """
+                }
+            }
+        }
+    }
+    
+    post {
+        always {
+            // Clean up Docker environment
+            sh 'docker-compose down || true'
+            sh 'docker system prune -f || true'
+            cleanWs()
+        }
+        success {
+            slackSend(
+                color: 'good', 
+                message: "Deployment successful!\n" +
+                        "${BACKEND_SERVICE} running on port ${BACKEND_PORT}\n" +
+                        "${FRONTEND_SERVICE} running on port ${FRONTEND_PORT}"
+            )
+        }
+        failure {
+            slackSend(
+                color: 'danger', 
+                message: "Deployment failed!\n" +
+                        "Services: ${BACKEND_SERVICE}:${BACKEND_PORT}, ${FRONTEND_SERVICE}:${FRONTEND_PORT}"
+            )
         }
     }
 }

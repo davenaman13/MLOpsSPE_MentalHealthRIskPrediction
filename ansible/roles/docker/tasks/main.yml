@@ -1,23 +1,38 @@
 ---
-- name: Install Docker
+- name: Install required packages for Docker
   apt:
-    name: "{{ item }}"
+    name: 
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - gnupg
+      - lsb-release
     state: present
-  with_items:
-    - docker.io
-    - python3-pip
-    - python3-dev
-  become: true
+    update_cache: yes
 
-- name: Add user to Docker group
-  user:
-    name: "{{ ansible_user }}"
-    group: docker
-  become: true
+- name: Add Docker GPG key
+  shell: |
+    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+  args:
+    creates: /usr/share/keyrings/docker-archive-keyring.gpg
 
-- name: Start Docker service
+- name: Add Docker repository
+  copy:
+    dest: /etc/apt/sources.list.d/docker.list
+    content: |
+      deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu focal stable
+
+- name: Update apt and install Docker Engine
+  apt:
+    name:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+    state: latest
+    update_cache: yes
+
+- name: Ensure Docker is started
   service:
     name: docker
     state: started
-    enabled: yes
-  become: true
+    enabled: true

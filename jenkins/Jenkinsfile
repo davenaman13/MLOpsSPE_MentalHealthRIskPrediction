@@ -82,10 +82,10 @@ pipeline {
             steps {
                 script {
                     // Stop existing containers if any
-                    sh 'docker-compose down --remove-orphans || true'
+                    sh 'docker compose down --remove-orphans || true'
                     
                     // Start new deployment
-                    sh 'docker-compose up -d --build'
+                    sh 'docker compose up -d --build'
                     
                     // Verify backend health
                     sh """
@@ -108,7 +108,7 @@ pipeline {
     post {
         always {
             // Cleanup
-            sh 'docker-compose down || true'
+            sh 'docker compose down || true'
             sh 'docker logout || true'
             cleanWs()
         }

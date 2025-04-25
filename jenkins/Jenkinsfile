@@ -8,12 +8,17 @@ pipeline {
         FRONTEND_SERVICE = 'mental-health-frontend'
         BACKEND_PORT = '5001'
         FRONTEND_PORT = '5003'
+        GITHUB_TOKEN = credentials('github-token-MLOps')
     }
     
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/davenaman13/MLOpsSPE_MentalHealthRIskPrediction.git'
+                git(
+                    url: 'https://github.com/davenaman13/MLOpsSPE_MentalHealthRIskPrediction.git',
+                    credentialsId: 'github-token-MLOps',
+                    branch: 'main'
+                )
             }
         }
         

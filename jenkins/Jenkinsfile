@@ -2,6 +2,7 @@ pipeline {
     agent any
     
     environment {
+        DOCKER_HUB_CREDS = credentials('docker-hub-credentials')
         COMPOSE_FILE = 'docker-compose.yml'
         BACKEND_SERVICE = 'mental-health-backend'
         FRONTEND_SERVICE = 'mental-health-frontend'
@@ -14,102 +15,118 @@ pipeline {
             steps {
                 git(
                     url: 'https://github.com/davenaman13/MLOpsSPE_MentalHealthRIskPrediction.git',
-                    branch: 'main'
+                    branch: 'main',
+                    changelog: false,
+                    poll: false
                 )
+            }
+        }
+        
+        stage('Docker Login') {
+            steps {
+                script {
+                    sh '''
+                        echo "$DOCKER_HUB_CREDS_PSW" | docker login \
+                        -u "$DOCKER_HUB_CREDS_USR" \
+                        --password-stdin
+                    '''
+                }
             }
         }
         
         stage('Build Images') {
             steps {
-                sh """
-                    docker build -t ${BACKEND_SERVICE}:${env.BUILD_ID} -f backend/Dockerfile backend/
-                    docker build -t ${FRONTEND_SERVICE}:${env.BUILD_ID} -f frontend/Dockerfile frontend/
-                """
+                script {
+                    // Build backend with Python 3.10-slim
+                    sh """
+                        docker build \
+                        -t ${BACKEND_SERVICE}:${env.BUILD_ID} \
+                        -f backend/Dockerfile \
+                        backend/
+                    """
+                    
+                    // Build frontend with Python 3.9
+                    sh """
+                        docker build \
+                        -t ${FRONTEND_SERVICE}:${env.BUILD_ID} \
+                        -f frontend/Dockerfile \
+                        frontend/
+                    """
+                }
             }
         }
         
-        stage('Unit Tests') {
+        stage('Run Tests') {
             steps {
-                sh """
-                    docker run --rm \
-                    -e PORT=${BACKEND_PORT} \
-                    ${BACKEND_SERVICE}:${env.BUILD_ID} \
-                    python -m pytest tests/unit/ || exit 1
+                script {
+                    // Backend tests
+                    sh """
+                        docker run --rm \
+                        -e PORT=${BACKEND_PORT} \
+                        ${BACKEND_SERVICE}:${env.BUILD_ID} \
+                        python -m pytest tests/
+                    """
                     
-                    docker run --rm \
-                    -e PORT=${FRONTEND_PORT} \
-                    ${FRONTEND_SERVICE}:${env.BUILD_ID} \
-                    npm test || exit 1
-                """
-            }
-        }
-        
-        stage('Integration Tests') {
-            steps {
-                sh """
-                    docker-compose up -d
-                    
-                    # Wait for backend
-                    while ! curl -f http://localhost:${BACKEND_PORT}/health; do
-                        sleep 5
-                        echo "Waiting for backend to start..."
-                    done
-                    
-                    # Run integration tests
-                    docker run --rm --network host \
-                    -e BACKEND_URL=http://localhost:${BACKEND_PORT} \
-                    -e FRONTEND_URL=http://localhost:${FRONTEND_PORT} \
-                    your-test-image:latest \
-                    pytest tests/integration/
-                    
-                    docker-compose down
-                """
-            }
-        }
-        
-        stage('Push Images') {
-            when {
-                branch 'main'
-            }
-            steps {
-                sh """
-                    docker tag ${BACKEND_SERVICE}:${env.BUILD_ID} ${BACKEND_SERVICE}:latest
-                    docker tag ${FRONTEND_SERVICE}:${env.BUILD_ID} ${FRONTEND_SERVICE}:latest
-                    
-                    docker push ${BACKEND_SERVICE}:latest
-                    docker push ${FRONTEND_SERVICE}:latest
-                """
+                    // Frontend tests
+                    sh """
+                        docker run --rm \
+                        -e PORT=${FRONTEND_PORT} \
+                        ${FRONTEND_SERVICE}:${env.BUILD_ID} \
+                        python -m pytest tests/
+                    """
+                }
             }
         }
         
         stage('Deploy') {
-            when {
-                branch 'main'
-            }
             steps {
-                sh """
-                    docker-compose down || true
-                    docker-compose pull || true
-                    docker-compose up -d
+                script {
+                    // Stop existing containers if any
+                    sh 'docker-compose down --remove-orphans || true'
                     
-                    # Health checks
-                    curl --retry 10 --retry-delay 5 --retry-connrefused \
-                    http://localhost:${BACKEND_PORT}/health || exit 1
+                    // Start new deployment
+                    sh 'docker-compose up -d --build'
                     
-                    curl --retry 10 --retry-delay 5 --retry-connrefused \
-                    http://localhost:${FRONTEND_PORT} || exit 1
-                """
+                    // Verify backend health
+                    sh """
+                        curl --retry 10 --retry-delay 5 \
+                        http://localhost:${BACKEND_PORT}/health \
+                        || exit 1
+                    """
+                    
+                    // Verify frontend availability
+                    sh """
+                        curl --retry 10 --retry-delay 5 \
+                        http://localhost:${FRONTEND_PORT} \
+                        || exit 1
+                    """
+                }
             }
         }
     }
     
     post {
         always {
-            sh """
-                docker-compose down || true
-                docker system prune -f || true
-            """
+            // Cleanup
+            sh 'docker-compose down || true'
+            sh 'docker logout || true'
             cleanWs()
+        }
+        success {
+            slackSend(
+                color: 'good',
+                message: """Deployment Successful!
+                |Backend API: http://your-server:5001
+                |Frontend App: http://your-server:5003
+                |Build Log: ${env.BUILD_URL}""".stripMargin()
+            )
+        }
+        failure {
+            slackSend(
+                color: 'danger',
+                message: """Deployment Failed!
+                |Check logs: ${env.BUILD_URL}""".stripMargin()
+            )
         }
     }
 }

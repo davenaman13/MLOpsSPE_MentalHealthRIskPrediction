@@ -1,35 +1,20 @@
-version: '3.8'
+version: '3.9'
 
 services:
-  backend:
-    build: ./backend
+  mental-health-backend:
+    build:
+      context: ./backend
+    container_name: mental-health-backend
     ports:
       - "5001:5001"
-    environment:
-      - FLASK_ENV=production
-    volumes:
-      - ./backend:/app
-    depends_on:
-      - redis
-    networks:
-      - mental-health-net
+    restart: always
 
-  frontend:
-    build: ./frontend
+  mental-health-frontend:
+    build:
+      context: ./frontend
+    container_name: mental-health-frontend
     ports:
       - "5003:5003"
     depends_on:
-      - backend
-    networks:
-      - mental-health-net
-
-  redis:
-    image: redis:alpine
-    ports:
-      - "6379:6379"
-    networks:
-      - mental-health-net
-
-networks:
-  mental-health-net:
-    driver: bridge
+      - mental-health-backend
+    restart: always

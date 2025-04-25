@@ -7,7 +7,7 @@ COPY requirements.txt .
 
 # Install dependencies
 RUN pip install --upgrade pip && \
-    pip install -r requirements.txt pytest pytest-cov
+    pip install --retries 5 --timeout 60 -r requirements.txt pytest pytest-cov
 
 # Then copy the rest
 COPY . .

@@ -1,35 +1,20 @@
 pipeline {
     agent any
-
     stages {
-        stage('Clone Repository') {
+        stage('Clone') {
             steps {
                 git 'https://github.com/davenaman13/MLOpsSPE_MentalHealthRIskPrediction.git'
             }
         }
-
-        stage('Build Docker Images') {
+        stage('Build Images') {
             steps {
-                sh 'docker build -t mental-backend ./backend'
-                sh 'docker build -t mental-frontend ./frontend'
+                sh 'docker-compose build'
             }
         }
-
-        stage('Push to DockerHub') {
+        stage('Test') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
-                    sh 'echo $PASS | docker login -u $USER --password-stdin'
-                    sh 'docker tag mental-backend $USER/mental-backend'
-                    sh 'docker tag mental-frontend $USER/mental-frontend'
-                    sh 'docker push $USER/mental-backend'
-                    sh 'docker push $USER/mental-frontend'
-                }
-            }
-        }
-
-        stage('Deploy with Ansible') {
-            steps {
-                sh 'ansible-playbook ansible/playbook.yml'
+                sh 'docker-compose up -d'
+                sh 'curl -X POST http://localhost:5003'
             }
         }
     }

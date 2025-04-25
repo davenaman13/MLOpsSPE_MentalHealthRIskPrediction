@@ -1,7 +1,19 @@
-- name: Deploy Mental Health Prediction App
-  hosts: k8s-master
-  become: yes
-
+- name: Set up MLOps Project
+  hosts: remote
+  become: yes  # This ensures sudo is used for all tasks
+  become_user: root
   tasks:
-    - name: Apply Kubernetes Configurations
-      shell: kubectl apply -f /home/naman/Desktop/MLOpsSPE/kubernetes
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+    - name: Install Docker
+      include_role:
+        name: docker
+
+    - name: Install Jenkins
+      include_role:
+        name: jenkins
+
+    - name: Deploy Application
+      include_role:
+        name: app_deploy

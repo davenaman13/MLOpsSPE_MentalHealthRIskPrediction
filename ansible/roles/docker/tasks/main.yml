@@ -1,0 +1,23 @@
+---
+- name: Install Docker
+  apt:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - docker.io
+    - python3-pip
+    - python3-dev
+  become: true
+
+- name: Add user to Docker group
+  user:
+    name: "{{ ansible_user }}"
+    group: docker
+  become: true
+
+- name: Start Docker service
+  service:
+    name: docker
+    state: started
+    enabled: yes
+  become: true

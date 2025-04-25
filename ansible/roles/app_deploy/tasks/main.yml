@@ -1,0 +1,30 @@
+---
+- name: Pull Docker images
+  docker_image:
+    name: "{{ item }}"
+    source: pull
+  loop:
+    - backend_image
+    - frontend_image
+
+- name: Run Backend Docker container
+  docker_container:
+    name: mental-health-backend
+    image: backend_image
+    state: started
+    restart_policy: always
+    ports:
+      - "5001:5001"
+    env:
+      - APP_ENV=production
+
+- name: Run Frontend Docker container
+  docker_container:
+    name: mental-health-frontend
+    image: frontend_image
+    state: started
+    restart_policy: always
+    ports:
+      - "5003:5003"
+    env:
+      - APP_ENV=production

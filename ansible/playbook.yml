@@ -5,7 +5,7 @@
   become: yes 
 
   vars:
-    project_root: "/home/naman/Desktop/MLOpsSPE"
+    project_root: "{{ lookup('env', 'WORKSPACE') }}/MLOpsSPE"
     deploy_path: "/opt/mental-health"
     app_name: "mental-health"
 

@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: backend
-        image: naman0508/mental-health-backend:latest
+        image: naman1301/mental-health-backend:latest
         ports:
         - containerPort: 5001
         env:

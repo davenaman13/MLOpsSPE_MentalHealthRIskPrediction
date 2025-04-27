@@ -1,6 +1,6 @@
 ---
 - name: Deploy Backend to Kubernetes
-  command: kubectl apply -f /opt/mental-health/kubernetes/backend-deployment.yml
+  cmd: ["kubectl", "apply", "-f", "/opt/mental-health/kubernetes/backend-deployment.yml", "--validate=false"]
   become: no # <--- disable sudo
 
 - name: Deploy Backend Service to Kubernetes

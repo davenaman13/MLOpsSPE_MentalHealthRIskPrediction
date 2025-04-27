@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: naman0508/mental-health-frontend:latest
+        image: naman1301/mental-health-frontend:latest
         ports:
         - containerPort: 5003
         env:

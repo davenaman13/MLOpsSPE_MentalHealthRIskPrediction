@@ -73,6 +73,15 @@ pipeline {
                 }
             }
         }
+        stage('Debug Workspace') {
+            steps {
+                script {
+                    echo "Current workspace: ${WORKSPACE}"
+                    sh "ls -R ${WORKSPACE}"  // List the entire workspace content to find the project root
+            }
+        }
+    }
+
 
         stage('Deploy with Ansible') {
             steps {

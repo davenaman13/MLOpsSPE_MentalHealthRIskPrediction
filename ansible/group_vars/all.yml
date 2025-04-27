@@ -1,0 +1,8 @@
+---
+app_name: mental-health
+backend_port: 5001
+frontend_port: 5003
+project_root: "/home/naman/Desktop/MLOpsSPE"   # Still your Desktop for source files
+deploy_path: "/opt/mental-health"              # Target path for deployment
+backend_container_name: mental-health-backend
+frontend_container_name: mental-health-frontend

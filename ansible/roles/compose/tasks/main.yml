@@ -1,0 +1,21 @@
+---
+- name: Create project directory
+  file:
+    path: "{{ deploy_path }}"
+    state: directory
+    mode: '0755'
+
+- name: Copy docker-compose.yml to deploy path
+  copy:
+    src: "{{ project_root }}/docker-compose.yml"
+    dest: "{{ deploy_path }}/docker-compose.yml"
+
+- name: Bring up services with Docker Compose
+  command: docker compose up -d --build
+  args:
+    chdir: "{{ deploy_path }}"
+  register: compose_up
+
+- name: Debug docker-compose output
+  debug:
+    var: compose_up

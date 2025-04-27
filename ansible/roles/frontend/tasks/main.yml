@@ -1,0 +1,12 @@
+---
+- name: Create frontend directory
+  file:
+    path: "{{ deploy_path }}/frontend"
+    state: directory
+    mode: '0755'
+
+- name: Copy frontend files
+  copy:
+    src: "{{ project_root }}/frontend"
+    dest: "{{ deploy_path }}"
+    remote_src: no

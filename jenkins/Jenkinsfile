@@ -3,7 +3,7 @@ pipeline {
     
     environment {
         DOCKER_HUB_CREDS = credentials('docker-hub-credentials')
-        DOCKER_USERNAME = 'your-docker-username' // Replace with your Docker Hub username
+        DOCKER_USERNAME = 'naman1301' // Replace with your Docker Hub username
         BACKEND_SERVICE = 'mental-health-backend'
         FRONTEND_SERVICE = 'mental-health-frontend'
         BACKEND_PORT = '5001'
@@ -79,7 +79,7 @@ pipeline {
                 script {
                     // Run Ansible playbook for deploying to Kubernetes
                     sh """
-                        ansible-playbook -i /path/to/your/ansible/hosts ${ANSIBLE_PLAYBOOK_PATH}
+                        ansible-playbook -i /home/Desktop/MLOpsSPE/ansible/inventory.ini ${ANSIBLE_PLAYBOOK_PATH}
                     """
                 }
             }

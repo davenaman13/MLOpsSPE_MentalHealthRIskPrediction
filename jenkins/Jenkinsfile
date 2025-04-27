@@ -3,11 +3,12 @@ pipeline {
     
     environment {
         DOCKER_HUB_CREDS = credentials('docker-hub-credentials')
-        COMPOSE_FILE = 'docker-compose.yml'
         BACKEND_SERVICE = 'mental-health-backend'
         FRONTEND_SERVICE = 'mental-health-frontend'
         BACKEND_PORT = '5001'
         FRONTEND_PORT = '5003'
+        K8S_NAMESPACE = 'default'  // Update your Kubernetes namespace if needed
+        ANSIBLE_PLAYBOOK_PATH = '/path/to/your/ansible/playbook.yml' // Path to your Ansible playbook
     }
     
     stages {
@@ -34,10 +35,10 @@ pipeline {
             }
         }
         
-        stage('Build Images') {
+        stage('Build Docker Images') {
             steps {
                 script {
-                    // Build backend with Python 3.10-slim
+                    // Build backend image
                     sh """
                         docker build \
                         -t ${BACKEND_SERVICE}:${env.BUILD_ID} \
@@ -45,7 +46,7 @@ pipeline {
                         backend/
                     """
                     
-                    // Build frontend with Python 3.9
+                    // Build frontend image
                     sh """
                         docker build \
                         -t ${FRONTEND_SERVICE}:${env.BUILD_ID} \
@@ -56,44 +57,49 @@ pipeline {
             }
         }
         
-        // stage('Run Tests') {
-        //     steps {
-        //         script {
-        //             // Backend tests
-        //             sh """
-        //                 docker run --rm \
-        //                 -e PORT=${BACKEND_PORT} \
-        //                 ${BACKEND_SERVICE}:${env.BUILD_ID} \
-        //                 python -m pytest tests/
-        //             """
-                    
-        //             // Frontend tests
-        //             sh """
-        //                 docker run --rm \
-        //                 -e PORT=${FRONTEND_PORT} \
-        //                 ${FRONTEND_SERVICE}:${env.BUILD_ID} \
-        //                 python -m pytest tests/
-        //             """
-        //         }
-        //     }
-        // }
-        
-        stage('Deploy') {
+        stage('Push Docker Images') {
             steps {
                 script {
-                    // Stop existing containers if any
-                    sh 'docker compose down --remove-orphans || true'
+                    // Push backend image to Docker Hub
+                    sh """
+                        docker push ${BACKEND_SERVICE}:${env.BUILD_ID}
+                    """
                     
-                    // Start new deployment
-                    sh 'docker compose up -d --build'
-                    
-                    // Verify backend health
+                    // Push frontend image to Docker Hub
+                    sh """
+                        docker push ${FRONTEND_SERVICE}:${env.BUILD_ID}
+                    """
+                }
+            }
+        }
+
+        stage('Deploy with Ansible') {
+            steps {
+                script {
+                    // Run Ansible playbook for deploying to Kubernetes
+                    sh """
+                        ansible-playbook -i /path/to/your/ansible/hosts ${ANSIBLE_PLAYBOOK_PATH}
+                    """
+                }
+            }
+        }
+        
+        stage('Verify Backend Health') {
+            steps {
+                script {
+                    // Verify backend health endpoint
                     sh """
                         curl --retry 10 --retry-delay 5 \
                         http://localhost:${BACKEND_PORT}/health \
                         || exit 1
                     """
-                    
+                }
+            }
+        }
+        
+        stage('Verify Frontend Availability') {
+            steps {
+                script {
                     // Verify frontend availability
                     sh """
                         curl --retry 10 --retry-delay 5 \
@@ -107,8 +113,7 @@ pipeline {
     
     post {
         always {
-            // Cleanup
-            sh 'docker compose down || true'
+            // Clean up Docker and logout
             sh 'docker logout || true'
             cleanWs()
         }

@@ -1,19 +1,24 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: frontend
+  name: mental-health-frontend-deployment
+  labels:
+    app: mental-health-frontend
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: frontend
+      app: mental-health-frontend
   template:
     metadata:
       labels:
-        app: frontend
+        app: mental-health-frontend
     spec:
       containers:
       - name: frontend
-        image: naman1301/mental-frontend
+        image: naman0508/mental-health-frontend:latest
         ports:
         - containerPort: 5003
+        env:
+        - name: PORT
+          value: "5003"

@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: mental-health-backend-service
+spec:
+  selector:
+    app: mental-health-backend
+  ports:
+  - protocol: TCP
+    port: 5001
+    targetPort: 5001
+  type: NodePort

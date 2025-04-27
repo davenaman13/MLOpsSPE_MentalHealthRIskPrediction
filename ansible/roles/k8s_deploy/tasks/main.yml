@@ -1,0 +1,16 @@
+---
+- name: Deploy Backend to Kubernetes
+  command: kubectl apply -f /opt/mental-health/kubernetes/backend-deployment.yml
+  become: no # <--- disable sudo
+
+- name: Deploy Backend Service to Kubernetes
+  command: kubectl apply -f /opt/mental-health/kubernetes/backend-service.yml
+  become: no
+
+- name: Deploy Frontend to Kubernetes
+  command: kubectl apply -f /opt/mental-health/kubernetes/frontend-deployment.yml
+  become: no
+
+- name: Deploy Frontend Service to Kubernetes
+  command: kubectl apply -f /opt/mental-health/kubernetes/frontend-service.yml
+  become: no

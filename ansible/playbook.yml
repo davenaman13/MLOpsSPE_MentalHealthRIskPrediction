@@ -2,6 +2,7 @@
 - name: Deploy Mental Health Application
   hosts: localhost
   connection: local
+  become: yes 
 
   vars:
     project_root: "/home/naman/Desktop/MLOpsSPE"
@@ -11,7 +12,8 @@
   roles:
     - backend
     - frontend
-    - compose
+    - copy_k8files
+    - k8s_deploy
 
 - name: Verify Services
   hosts: localhost

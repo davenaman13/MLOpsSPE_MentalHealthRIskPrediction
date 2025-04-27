@@ -1,0 +1,30 @@
+---
+- name: Create kubernetes directory
+  file:
+    path: "{{ deploy_path }}/kubernetes"
+    state: directory
+    mode: '0755'
+
+- name: Copy backend deployment YAML
+  copy:
+    src: "{{ project_root }}/kubernetes/backend-deployment.yml"
+    dest: "{{ deploy_path }}/kubernetes/backend-deployment.yml"
+    remote_src: no
+
+- name: Copy backend service YAML
+  copy:
+    src: "{{ project_root }}/kubernetes/backend-service.yml"
+    dest: "{{ deploy_path }}/kubernetes/backend-service.yml"
+    remote_src: no
+
+- name: Copy frontend deployment YAML
+  copy:
+    src: "{{ project_root }}/kubernetes/frontend-deployment.yml"
+    dest: "{{ deploy_path }}/kubernetes/frontend-deployment.yml"
+    remote_src: no
+
+- name: Copy frontend service YAML
+  copy:
+    src: "{{ project_root }}/kubernetes/frontend-service.yml"
+    dest: "{{ deploy_path }}/kubernetes/frontend-service.yml"
+    remote_src: no

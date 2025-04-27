@@ -9,7 +9,7 @@ pipeline {
         BACKEND_PORT = '5001'
         FRONTEND_PORT = '5003'
         K8S_NAMESPACE = 'default'  // Update your Kubernetes namespace if needed
-        ANSIBLE_PLAYBOOK_PATH = 'Desktop/MLOpsSPE/ansible/playbook.yml' // Path to your Ansible playbook
+        ANSIBLE_PLAYBOOK_PATH = 'ansible/playbook.yml' // Path to your Ansible playbook
     }
     
     stages {
@@ -79,7 +79,7 @@ pipeline {
                 script {
                     // Run Ansible playbook for deploying to Kubernetes
                     sh """
-                        ansible-playbook -i Desktop/MLOpsSPE/ansible/inventory.ini ${ANSIBLE_PLAYBOOK_PATH}
+                        ansible-playbook -i ansible/inventory.ini ${ANSIBLE_PLAYBOOK_PATH}
                     """
                 }
             }

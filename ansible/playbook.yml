@@ -32,3 +32,4 @@
     - name: Show health check response
       debug:
         var: health_check.content
+

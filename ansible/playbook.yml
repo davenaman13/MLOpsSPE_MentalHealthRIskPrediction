@@ -5,7 +5,7 @@
   become: yes 
 
   vars:
-    project_root: "{{ lookup('env', 'WORKSPACE') }}/MLOpsSPE"
+    project_root: "/var/lib/jenkins/workspace/MentalHealthRiskPrediction"
     deploy_path: "/opt/mental-health"
     app_name: "mental-health"
 

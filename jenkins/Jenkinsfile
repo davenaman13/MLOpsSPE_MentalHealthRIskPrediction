@@ -10,6 +10,7 @@ pipeline {
         FRONTEND_PORT = '5003'
         K8S_NAMESPACE = 'default'  // Update your Kubernetes namespace if needed
         ANSIBLE_PLAYBOOK_PATH = 'ansible/playbook.yml' // Path to your Ansible playbook
+        KUBECONFIG = "/var/lib/jenkins/.kube/config"
     }
     
     stages {

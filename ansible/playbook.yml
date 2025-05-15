@@ -5,14 +5,14 @@
   become: yes 
 
   vars:
-    project_root: "/var/lib/jenkins/workspace/MentalHealthRiskPrediction"
-    deploy_path: "/opt/mental-health"
+    # project_root: "/var/lib/jenkins/workspace/MentalHealthRiskPrediction"
+    # deploy_path: "/opt/mental-health"
     app_name: "mental-health"
 
   roles:
-    - backend
-    - frontend
-    - copy_k8files
+    # - backend
+    # - frontend
+    # - copy_k8files
     - k8s_deploy
 
 - name: Verify Services
@@ -32,4 +32,19 @@
     - name: Show health check response
       debug:
         var: health_check.content
+    
+    - name: Wait for frontend service to become healthy
+      uri:
+        url: http://localhost:{{ frontend_port }}
+        return_content: yes
+      register: frontend_check
+      until: frontend_check.status == 200
+      retries: 10
+      delay: 5
+      ignore_errors: yes
+
+    - name: Show frontend check response
+      debug:
+        var: frontend_check.content
+
 

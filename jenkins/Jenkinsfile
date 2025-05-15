@@ -43,7 +43,7 @@ pipeline {
                     // Build backend image with username
                     sh """
                         docker build \
-                        -t ${DOCKER_USERNAME}/${BACKEND_SERVICE}:${env.BUILD_ID} \
+                        -t ${DOCKER_USERNAME}/${BACKEND_SERVICE}:latest \
                         -f backend/Dockerfile \
                         backend/
                     """
@@ -51,7 +51,7 @@ pipeline {
                     // Build frontend image with username
                     sh """
                         docker build \
-                        -t ${DOCKER_USERNAME}/${FRONTEND_SERVICE}:${env.BUILD_ID} \
+                        -t ${DOCKER_USERNAME}/${FRONTEND_SERVICE}:latest \
                         -f frontend/Dockerfile \
                         frontend/
                     """
@@ -64,12 +64,12 @@ pipeline {
                 script {
                     // Push backend image to Docker Hub
                     sh """
-                        docker push ${DOCKER_USERNAME}/${BACKEND_SERVICE}:${env.BUILD_ID}
+                        docker push ${DOCKER_USERNAME}/${BACKEND_SERVICE}:latest
                     """
                     
                     // Push frontend image to Docker Hub
                     sh """
-                        docker push ${DOCKER_USERNAME}/${FRONTEND_SERVICE}:${env.BUILD_ID}
+                        docker push ${DOCKER_USERNAME}/${FRONTEND_SERVICE}:latest
                     """
                 }
             }
